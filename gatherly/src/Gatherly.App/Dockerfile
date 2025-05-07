@@ -20,3 +20,9 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Gatherly.App.dll"]
+
+FROM mcr.microsoft.com/mssql/server:2019-latest
+ENV ACCEPT_EULA=Y
+ENV SA_PASSWORD=YourStrong_Password123
+
+EXPOSE 1433

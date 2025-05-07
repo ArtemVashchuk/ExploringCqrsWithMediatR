@@ -2,10 +2,8 @@
 
 namespace Gatherly.Persistence;
 
-internal sealed class UnitOfWork : IUnitOfWork
+internal sealed class UnitOfWork(ApplicationDbContext dbContext) : IUnitOfWork
 {
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        return Task.CompletedTask;
-    }
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
+        await dbContext.SaveChangesAsync(cancellationToken);
 }

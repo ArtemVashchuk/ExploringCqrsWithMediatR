@@ -6,39 +6,25 @@ using MediatR;
 
 namespace Gatherly.Application.Invitations.Commands.SendInvitation;
 
-internal sealed class SendInvitationCommandHandler : IRequestHandler<SendInvitationCommand>
+internal sealed class SendInvitationCommandHandler(
+    IMemberRepository memberRepository,
+    IGatheringRepository gatheringRepository,
+    IInvitationRepository invitationRepository,
+    IUnitOfWork unitOfWork,
+    IEmailService emailService)
+    : IRequestHandler<SendInvitationCommand>
 {
-    private readonly IMemberRepository _memberRepository;
-    private readonly IGatheringRepository _gatheringRepository;
-    private readonly IInvitationRepository _invitationRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IEmailService _emailService;
-
-    public SendInvitationCommandHandler(
-        IMemberRepository memberRepository,
-        IGatheringRepository gatheringRepository,
-        IInvitationRepository invitationRepository,
-        IUnitOfWork unitOfWork,
-        IEmailService emailService)
+    public async Task Handle(SendInvitationCommand request, CancellationToken cancellationToken)
     {
-        _memberRepository = memberRepository;
-        _gatheringRepository = gatheringRepository;
-        _invitationRepository = invitationRepository;
-        _unitOfWork = unitOfWork;
-        _emailService = emailService;
-    }
-
-    public async Task<Unit> Handle(SendInvitationCommand request, CancellationToken cancellationToken)
-    {
-        var member = await _memberRepository
+        var member = await memberRepository
             .GetByIdAsync(request.MemberId, cancellationToken);
 
-        var gathering = await _gatheringRepository
+        var gathering = await gatheringRepository
             .GetByIdWithCreatorAsync(request.GatheringId, cancellationToken);
 
         if (member is null || gathering is null)
         {
-            return Unit.Value;
+            return;
         }
 
         Result<Invitation> invitationResult = gathering.SendInvitation(member);
@@ -46,19 +32,17 @@ internal sealed class SendInvitationCommandHandler : IRequestHandler<SendInvitat
         if (invitationResult.IsFailure)
         {
             // Log error
-            return Unit.Value;
+            return;
         }
 
-        _invitationRepository.Add(invitationResult.Value);
+        invitationRepository.Add(invitationResult.Value);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Send email
-        await _emailService.SendInvitationSentEmailAsync(
+        await emailService.SendInvitationSentEmailAsync(
             member,
             gathering,
             cancellationToken);
-
-        return Unit.Value;
     }
 }

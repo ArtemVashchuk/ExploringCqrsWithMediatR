@@ -4,21 +4,14 @@ using Gatherly.Domain.Shared;
 
 namespace Gatherly.Application.Members.Queries.GetMemberById;
 
-internal sealed class GetMemberByIdQueryHandler
+internal sealed class GetMemberByIdQueryHandler(IMemberRepository memberRepository)
     : IQueryHandler<GetMemberByIdQuery, MemberResponse>
 {
-    private readonly IMemberRepository _memberRepository;
-
-    public GetMemberByIdQueryHandler(IMemberRepository memberRepository)
-    {
-        _memberRepository = memberRepository;
-    }
-
     public async Task<Result<MemberResponse>> Handle(
         GetMemberByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var member = await _memberRepository.GetByIdAsync(
+        var member = await memberRepository.GetByIdAsync(
             request.MemberId,
             cancellationToken);
 

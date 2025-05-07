@@ -1,18 +1,23 @@
 ﻿using Gatherly.Domain.Entities;
 using Gatherly.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Gatherly.Persistence.Repository;
 
-internal sealed class MemberRepository : IMemberRepository
+internal sealed class MemberRepository(ApplicationDbContext dbContext) : IMemberRepository
 {
     public async Task<Member?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        await Task.CompletedTask;
-
-        return null;
+        var members = await dbContext
+            .Set<Member>()
+            .FirstOrDefaultAsync(m => m.Id == id,
+                cancellationToken: cancellationToken);
+        
+        return members;
     }
 
     public void Add(Member member)
     {
+        dbContext.Set<Member>().Add(member);
     }
 }

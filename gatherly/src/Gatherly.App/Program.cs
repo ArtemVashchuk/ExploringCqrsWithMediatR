@@ -1,19 +1,30 @@
-using MediatR;
+using Gatherly.App.Extensions;
+using Gatherly.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder
     .Services
-    .Scan(
-        selector => selector
-            .FromAssemblies(
-                Gatherly.Infrastructure.AssemblyReference.Assembly,
-                Gatherly.Persistence.AssemblyReference.Assembly)
-            .AddClasses(false)
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
+    .Scan(selector => selector
+        .FromAssemblies(
+            Gatherly.Infrastructure.AssemblyReference.Assembly,
+            Gatherly.Persistence.AssemblyReference.Assembly)
+        .AddClasses(false)
+        .AsImplementedInterfaces()
+        .WithScopedLifetime());
 
-builder.Services.AddMediatR(Gatherly.Application.AssemblyReference.Assembly);
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Gatherly.Application.AssemblyReference.Assembly));
+
+string connectionString = builder.Configuration.GetConnectionString("Database")!;
+
+builder.Services.AddDbContext<ApplicationDbContext>((_, optionsBuilder) =>
+{
+    optionsBuilder.UseSqlServer(connectionString)
+        .LogTo(Console.WriteLine)
+        .EnableSensitiveDataLogging()
+        .EnableDetailedErrors();
+});
 
 builder
     .Services
@@ -23,6 +34,8 @@ builder
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.ApplyMigrations();
 
 if (app.Environment.IsDevelopment())
 {

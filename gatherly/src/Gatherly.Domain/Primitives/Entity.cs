@@ -1,13 +1,8 @@
 ﻿namespace Gatherly.Domain.Primitives;
 
-public abstract class Entity : IEquatable<Entity>
+public abstract class Entity(Guid id) : IEquatable<Entity>
 {
-    protected Entity(Guid id)
-    {
-        Id = id;
-    }
-
-    public Guid Id { get; private init; }
+    public Guid Id { get; private init; } = id;
 
     public static bool operator ==(Entity? first, Entity? second)
     {

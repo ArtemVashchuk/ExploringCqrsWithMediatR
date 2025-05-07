@@ -6,25 +6,15 @@ using Gatherly.Domain.Shared;
 
 namespace Gatherly.Application.Invitations.Commands.AcceptInvitation;
 
-internal sealed class AcceptInvitationCommandHandler : ICommandHandler<AcceptInvitationCommand>
+internal sealed class AcceptInvitationCommandHandler(
+    IGatheringRepository gatheringRepository,
+    IAttendeeRepository attendeeRepository,
+    IUnitOfWork unitOfWork)
+    : ICommandHandler<AcceptInvitationCommand>
 {
-    private readonly IGatheringRepository _gatheringRepository;
-    private readonly IAttendeeRepository _attendeeRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public AcceptInvitationCommandHandler(
-        IGatheringRepository gatheringRepository,
-        IAttendeeRepository attendeeRepository,
-        IUnitOfWork unitOfWork)
-    {
-        _gatheringRepository = gatheringRepository;
-        _attendeeRepository = attendeeRepository;
-        _unitOfWork = unitOfWork;
-    }
-
     public async Task<Result> Handle(AcceptInvitationCommand request, CancellationToken cancellationToken)
     {
-        var gathering = await _gatheringRepository
+        var gathering = await gatheringRepository
             .GetByIdWithCreatorAsync(request.GatheringId, cancellationToken);
 
         if (gathering is null)
@@ -46,10 +36,10 @@ internal sealed class AcceptInvitationCommandHandler : ICommandHandler<AcceptInv
 
         if (acceptInvitationResult.IsSuccess)
         {
-            _attendeeRepository.Add(acceptInvitationResult.Value);
+            attendeeRepository.Add(acceptInvitationResult.Value);
         }
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

@@ -4,12 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Gatherly.Presentation.Abstractions;
 
 [ApiController]
-public abstract class ApiController : ControllerBase
+public abstract class ApiController(ISender sender) : ControllerBase
 {
-    protected readonly ISender Sender;
-
-    protected ApiController(ISender sender)
-    {
-        Sender = sender;
-    }
+    protected readonly ISender Sender = sender;
 }

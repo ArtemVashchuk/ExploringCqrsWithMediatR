@@ -1,5 +1,5 @@
-﻿using Gatherly.Domain.Enums;
-using MediatR;
+﻿using Gatherly.Application.Abstractions.Messaging;
+using Gatherly.Domain.Enums;
 
 namespace Gatherly.Application.Gatherings.Commands.CreateGathering;
 
@@ -10,4 +10,4 @@ public sealed record CreateGatheringCommand(
     string Name,
     string? Location,
     int? MaximumNumberOfAttendees,
-    int? InvitationsValidBeforeInHours) : IRequest;
+    int? InvitationsValidBeforeInHours) : ICommand;

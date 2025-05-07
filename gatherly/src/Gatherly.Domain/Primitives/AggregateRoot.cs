@@ -1,13 +1,8 @@
 ﻿namespace Gatherly.Domain.Primitives;
 
-public abstract class AggregateRoot : Entity
+public abstract class AggregateRoot(Guid id) : Entity(id)
 {
     private readonly List<IDomainEvent> _domainEvents = [];
-
-    protected AggregateRoot(Guid id)
-        : base(id)
-    {
-    }
 
     protected void RaiseDomainEvent(IDomainEvent domainEvent)
     {

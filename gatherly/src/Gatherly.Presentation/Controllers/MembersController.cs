@@ -8,24 +8,21 @@ using Microsoft.AspNetCore.Mvc;
 namespace Gatherly.Presentation.Controllers;
 
 [Route("api/members")]
-public sealed class MembersController : ApiController
+public sealed class MembersController(ISender sender) : ApiController(sender)
 {
-    public MembersController(ISender sender)
-        : base(sender)
-    {
-    }
-
     [HttpPost]
-    public async Task<IActionResult> RegisterMember(CancellationToken cancellationToken)
+    public async Task<IActionResult> RegisterMember([FromBody]RegisterMemberRequest request ,CancellationToken cancellationToken)
     {
         var command = new CreateMemberCommand(
-            "milan@milanjovanic.tech",
-            "Milan",
-            "Jovanovic");
+            request.Email,
+            request.FirstName,
+            request.LastName);
 
         var result = await Sender.Send(command, cancellationToken);
         
-        return result.IsSuccess ? Ok() : BadRequest(result.Error);
+        return result.IsSuccess
+            ? Ok()
+            : BadRequest(result.Error);
     }
 
     [HttpGet("{id}")]
@@ -35,6 +32,8 @@ public sealed class MembersController : ApiController
 
         Result<MemberResponse> response = await Sender.Send(query, cancellationToken);
 
-        return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
+        return response.IsSuccess
+            ? Ok(response.Value)
+            : NotFound(response.Error);
     }
 }

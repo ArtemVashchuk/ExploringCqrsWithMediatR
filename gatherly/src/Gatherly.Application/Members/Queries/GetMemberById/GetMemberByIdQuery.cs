@@ -2,4 +2,5 @@
 
 namespace Gatherly.Application.Members.Queries.GetMemberById;
 
-public sealed record GetMemberByIdQuery(Guid MemberId) : IQuery<MemberResponse>;
+public sealed record GetMemberByIdQuery(Guid MemberId)
+    : IQuery<MemberResponse>;
