@@ -16,8 +16,8 @@ internal sealed class MemberRepository(ApplicationDbContext dbContext) : IMember
         return members;
     }
 
-    public void Add(Member member)
+    public async Task Add(Member member)
     {
-        dbContext.Set<Member>().Add(member);
+         await dbContext.Set<Member>().AddAsync(member);
     }
 }
